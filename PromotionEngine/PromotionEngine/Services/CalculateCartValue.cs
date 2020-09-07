@@ -14,20 +14,45 @@ namespace PromotionEngine.Services
         Dictionary<string, int> dictSkuUnitPrice = new Dictionary<string, int>();
         Dictionary<string, int> dictProCharActivePromos = new Dictionary<string, int>();
 
-        public Task<(decimal, IEnumerable<string>)> GetTotalAndCartItems(string[] cartArray)
+        public async Task<(decimal, IEnumerable<string>)> GetTotalAndCartItems(string[] cartArray)
         {
             dictSkuUnitPrice = sku.GetlstSKUUnitPrice();
             dictProCharActivePromos = promo.GetlstProCharActivePromos();
             List<string> FinalSkulst = new List<string>();
             decimal total = 0;
 
-            //Get all the added Sku items along with promotion and their count
             Dictionary<string, int> dictSkuCount = GetSkuCount(cartArray, dictSkuUnitPrice.Keys.ToList(),
                 dictProCharActivePromos.Keys.ToList());
 
-            throw new NotImplementedException();
+            foreach (KeyValuePair<string, int> item in dictSkuCount)
+            {
+                int value = item.Value;
+                string skuKey = item.Key;
+                decimal sum = 0;
+                if (dictProCharActivePromos.ContainsKey(skuKey))
+                {
+                    int promoval = dictProCharActivePromos.FirstOrDefault(m => m.Key == skuKey).Value;
+                    total += (promoval * value);
+                    sum = promoval * value;
+                }
+                else
+                {
+                    int skuVal = dictSkuUnitPrice.FirstOrDefault(m => m.Key == skuKey).Value;
+                    total += (skuVal * value);
+                    sum = skuVal * value;
+                }
+                FinalSkulst.Add(skuKey + " * " + value + " = " + sum);
+            }
+            return (total, FinalSkulst);
         }
 
+        /// <summary>
+        /// Get all the added Sku items along with promotion and their count
+        /// </summary>
+        /// <param name="cartArray"></param>
+        /// <param name="lstSku"></param>
+        /// <param name="lstPromo"></param>
+        /// <returns></returns>
         private Dictionary<string, int> GetSkuCount(string[] cartArray, List<string> lstSku, List<string> lstPromo)
         {
             Dictionary<string, int> dictSku = new Dictionary<string, int>();
@@ -143,8 +168,7 @@ namespace PromotionEngine.Services
         /// </summary>
         /// <param name="promoSkus"></param>
         /// <param name="dictSku"></param>
-        /// <returns>string (Sku) with least count</returns>
-        
+        /// <returns>string (Sku) with least count</returns>        
         private string GetSkuWithLeastValue(char[] promoSkus, Dictionary<string, int> dictSku)
         {
             int i = 0;

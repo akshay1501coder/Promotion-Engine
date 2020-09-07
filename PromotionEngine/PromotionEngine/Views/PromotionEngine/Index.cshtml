@@ -23,7 +23,11 @@
     <div class="col-sm-4">
         <ul class="list-group" id="cartItemsId"></ul>
     </div>
+    <div class="col-sm-2" id="output">
+        <h3>Output:</h3>
+    </div>
     <div class="col-sm-4" id="cart">
+        <label><b>Cart value : </b></label>
         <span id="totalSum"></span>
         <ul id="finalCartlogic">
         </ul>
@@ -32,7 +36,10 @@
 
 
 <script>
+
     $(document).ready(function () {
+        $('#output').hide();
+        $('#cart').hide();
         //to get All sku in dropdown
         $.ajax({
             dataType: 'json',
@@ -45,6 +52,7 @@
                 }
                 $('#Sku').append(option);
             }
+
         })
     })
 
@@ -52,6 +60,8 @@
         $("#cartItemsId").empty();
         $('#finalCartlogic').empty();
         $("#totalSum").empty();
+        $('#output').hide();
+        $('#cart').hide();
     });
 
     //Adding items to cart
@@ -61,7 +71,34 @@
     })
 
     $("#btnGetTotal").click(function () {
-
-    })
+        var arr = [];
+        //loop to get all added items
+        $("#cartItemsId li").each(function () { arr.push($(this).text()) });
+        if (arr.length > 0) {
+            $.ajax({
+                dataType: 'json',
+                type: 'POST',
+                async: true,
+                data: { cartArray: arr },
+                url: "PromotionEngine/GetTotalCartValue",
+                success: function (data, status) {
+                    $('#output').show();
+                    $('#cart').show();
+                    $("#totalSum").html(data.total);
+                    let text = '';
+                    for (i = 0; i < data.cartitems.length; i++) {
+                        text += '<li>' + data.cartitems[i] + '</li>'
+                    }
+                    $('#finalCartlogic').append(text);
+                },
+                error: function (xhr, status, error) { // error callback
+                    var err = xhr.responseText;
+                    console.log(err);
+                }
+            });
+        } else {
+            alert("please add item to cart");
+        }
+    });
 </script>
 
