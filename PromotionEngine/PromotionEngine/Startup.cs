@@ -46,7 +46,7 @@ namespace PromotionEngine
             {
                 endpoints.MapControllerRoute(
                     name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
+                    pattern: "{controller=PromotionEngine}/{action=Index}/{id?}");
             });
         }
     }
